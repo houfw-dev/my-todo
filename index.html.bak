@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flowy Todo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(180deg, #f8f5ff 0%, #f0f0ff 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #7c6aef 0%, #59d0ff 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .logo-text {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #7c6aef 0%, #59d0ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            color: #9896b1;
+            font-size: 14px;
+        }
+
+        .stats-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: white;
+            border-radius: 16px;
+            padding: 20px 12px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(124, 106, 239, 0.08);
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-card.total .stat-number {
+            color: #6b73ff;
+        }
+
+        .stat-card.in-progress .stat-number {
+            color: #ff6b9a;
+        }
+
+        .stat-card.completed .stat-number {
+            color: #8b7cff;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #9896b1;
+        }
+
+        .add-task-container {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(124, 106, 239, 0.08);
+        }
+
+        .add-task-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            padding: 12px 16px;
+            font-size: 15px;
+            color: #333;
+            background: #f8f7ff;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .add-task-input::placeholder {
+            color: #c4c2d5;
+        }
+
+        .add-task-options {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .select-group {
+            flex: 1;
+        }
+
+        .select-group label {
+            display: block;
+            font-size: 12px;
+            color: #9896b1;
+            margin-bottom: 4px;
+        }
+
+        .select-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: none;
+            background: #f8f7ff;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #333;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .add-task-btn {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #7c6aef 0%, #59d0ff 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            flex-shrink: 0;
+        }
+
+        .add-task-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(124, 106, 239, 0.4);
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .filter-tab {
+            padding: 8px 20px;
+            border: none;
+            background: transparent;
+            color: #9896b1;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 20px;
+            transition: all 0.2s;
+        }
+
+        .filter-tab.active {
+            background: white;
+            color: #7c6aef;
+            font-weight: 600;
+            box-shadow: 0 2px 10px rgba(124, 106, 239, 0.1);
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .task-item {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            box-shadow: 0 4px 20px rgba(124, 106, 239, 0.06);
+            transition: opacity 0.3s;
+        }
+
+        .task-item.completed {
+            opacity: 0.6;
+        }
+
+        .task-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .task-checkbox.checked {
+            background: linear-gradient(135deg, #7c6aef 0%, #59d0ff 100%);
+            border-color: transparent;
+        }
+
+        .task-checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-title {
+            font-size: 15px;
+            color: #333;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .task-item.completed .task-title {
+            text-decoration: line-through;
+            color: #9896b1;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .task-tag {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .task-tag.work {
+            background: #e8f4ff;
+            color: #4a9eff;
+        }
+
+        .task-tag.personal {
+            background: #ffeef4;
+            color: #ff6b9a;
+        }
+
+        .task-tag.health {
+            background: #e8fff0;
+            color: #36d399;
+        }
+
+        .task-tag.study {
+            background: #f0e8ff;
+            color: #9b7cff;
+        }
+
+        .task-priority {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .task-priority.high {
+            background: #ffeaea;
+            color: #ff5252;
+        }
+
+        .task-priority.medium {
+            background: #fff7e0;
+            color: #ff9800;
+        }
+
+        .task-priority.low {
+            background: #e8f5e9;
+            color: #4caf50;
+        }
+
+        .task-time {
+            font-size: 12px;
+            color: #9896b1;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .task-action-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            color: #9896b1;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .task-action-btn:hover {
+            background: #f8f7ff;
+            color: #7c6aef;
+        }
+
+        .task-action-btn.delete:hover {
+            color: #ff5252;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #9896b1;
+            font-size: 12px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #9896b1;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-overlay.hidden {
+            display: none;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            width: 100%;
+            max-width: 360px;
+            box-shadow: 0 20px 60px rgba(124, 106, 239, 0.2);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .modal-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            padding: 14px 16px;
+            font-size: 15px;
+            color: #333;
+            background: #f8f7ff;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .modal-select-group {
+            margin-bottom: 16px;
+        }
+
+        .modal-select-group label {
+            display: block;
+            font-size: 13px;
+            color: #9896b1;
+            margin-bottom: 8px;
+        }
+
+        .modal-select-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            background: #f8f7ff;
+            border-radius: 12px;
+            font-size: 14px;
+            color: #333;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-btn.cancel {
+            background: #f8f7ff;
+            color: #9896b1;
+        }
+
+        .modal-btn.cancel:hover {
+            background: #ebeaf5;
+        }
+
+        .modal-btn.save {
+            background: linear-gradient(135deg, #7c6aef 0%, #59d0ff 100%);
+            color: white;
+        }
+
+        .modal-btn.save:hover {
+            box-shadow: 0 4px 15px rgba(124, 106, 239, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">☑</div>
+                <h1 class="logo-text">Flowy Todo</h1>
+            </div>
+            <p class="tagline">让每一天都井井有条</p>
+        </header>
+
+        <div class="stats-container">
+            <div class="stat-card total">
+                <div class="stat-number" id="totalCount">12</div>
+                <div class="stat-label">全部任务</div>
+            </div>
+            <div class="stat-card in-progress">
+                <div class="stat-number" id="inProgressCount">5</div>
+                <div class="stat-label">进行中</div>
+            </div>
+            <div class="stat-card completed">
+                <div class="stat-number" id="completedCount">7</div>
+                <div class="stat-label">已完成</div>
+            </div>
+        </div>
+
+        <div class="add-task-container">
+            <input type="text" class="add-task-input" id="taskInput" placeholder="添加新任务...">
+            <div class="add-task-options">
+                <div class="select-group">
+                    <label>分类</label>
+                    <select id="tagSelect">
+                        <option value="personal">个人</option>
+                        <option value="work">工作</option>
+                        <option value="health">健康</option>
+                        <option value="study">学习</option>
+                    </select>
+                </div>
+                <div class="select-group">
+                    <label>优先级</label>
+                    <select id="prioritySelect">
+                        <option value="low">低</option>
+                        <option value="medium">中</option>
+                        <option value="high">高</option>
+                    </select>
+                </div>
+                <button class="add-task-btn" id="addBtn">+</button>
+            </div>
+        </div>
+
+        <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all">全部</button>
+            <button class="filter-tab" data-filter="inProgress">进行中</button>
+            <button class="filter-tab" data-filter="completed">已完成</button>
+        </div>
+
+        <div class="task-list" id="taskList">
+            <!-- Tasks will be rendered here -->
+        </div>
+
+        <footer class="footer">
+            用 ❤️ 打造，让生活更美好
+        </footer>
+    </div>
+
+    <div class="modal-overlay hidden" id="editModal">
+        <div class="modal">
+            <h3 class="modal-title">编辑任务</h3>
+            <input type="text" class="modal-input" id="editTaskInput" placeholder="任务内容...">
+            <div class="modal-select-group">
+                <label>分类</label>
+                <select id="editTagSelect">
+                    <option value="personal">个人</option>
+                    <option value="work">工作</option>
+                    <option value="health">健康</option>
+                    <option value="study">学习</option>
+                </select>
+            </div>
+            <div class="modal-select-group">
+                <label>优先级</label>
+                <select id="editPrioritySelect">
+                    <option value="low">低</option>
+                    <option value="medium">中</option>
+                    <option value="high">高</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" id="cancelEditBtn">取消</button>
+                <button class="modal-btn save" id="saveEditBtn">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initial tasks data
+        let tasks = [
+            { id: 1, title: '完成项目提案文档', tag: 'work', priority: 'high', time: '今天 · 下午 3:00', completed: false },
+            { id: 2, title: '准备周末的生日派对', tag: 'personal', priority: 'medium', time: '周六 · 下午 6:00', completed: false },
+            { id: 3, title: '晨跑 5 公里', tag: 'health', priority: 'low', time: '每天 · 早上 7:00', completed: false },
+            { id: 4, title: '阅读《设计心理学》第三章', tag: 'study', priority: 'medium', time: '已完成', completed: true },
+            { id: 5, title: '团队周会', tag: 'work', priority: 'high', time: '周三 · 上午 10:00', completed: true },
+            { id: 6, title: '给花浇水', tag: 'personal', priority: 'low', time: '每周二、四', completed: true },
+            { id: 7, title: '整理工作邮件', tag: 'work', priority: 'low', time: '每天', completed: true },
+        ];
+
+        let currentFilter = 'all';
+        let nextId = 8;
+        let editingTaskId = null;
+
+        // DOM Elements
+        const taskInput = document.getElementById('taskInput');
+        const tagSelect = document.getElementById('tagSelect');
+        const prioritySelect = document.getElementById('prioritySelect');
+        const addBtn = document.getElementById('addBtn');
+        const taskList = document.getElementById('taskList');
+        const filterTabs = document.querySelectorAll('.filter-tab');
+        const totalCount = document.getElementById('totalCount');
+        const inProgressCount = document.getElementById('inProgressCount');
+        const completedCount = document.getElementById('completedCount');
+        const editModal = document.getElementById('editModal');
+        const editTaskInput = document.getElementById('editTaskInput');
+        const editTagSelect = document.getElementById('editTagSelect');
+        const editPrioritySelect = document.getElementById('editPrioritySelect');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const saveEditBtn = document.getElementById('saveEditBtn');
+
+        // Tag options for new tasks
+        const tagNames = { personal: '个人', work: '工作', health: '健康', study: '学习' };
+        const priorityNames = { high: '高', medium: '中', low: '低' };
+
+        // Render tasks
+        function renderTasks() {
+            let filteredTasks = tasks;
+            if (currentFilter === 'inProgress') {
+                filteredTasks = tasks.filter(t => !t.completed);
+            } else if (currentFilter === 'completed') {
+                filteredTasks = tasks.filter(t => t.completed);
+            }
+
+            if (filteredTasks.length === 0) {
+                taskList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <div>暂无任务</div>
+                    </div>
+                `;
+                return;
+            }
+
+            taskList.innerHTML = filteredTasks.map(task => `
+                <div class="task-item ${task.completed ? 'completed' : ''}" data-id="${task.id}">
+                    <div class="task-checkbox ${task.completed ? 'checked' : ''}" onclick="toggleTask(${task.id})"></div>
+                    <div class="task-content">
+                        <div class="task-title">${escapeHtml(task.title)}</div>
+                        <div class="task-meta">
+                            <span class="task-tag ${task.tag}">${tagNames[task.tag]}</span>
+                            <span class="task-priority ${task.priority}">${priorityNames[task.priority]}</span>
+                            <span class="task-time">${task.time}</span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="task-action-btn edit" onclick="openEditModal(${task.id})" title="编辑">✏️</button>
+                        <button class="task-action-btn delete" onclick="deleteTask(${task.id})" title="删除">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+
+            updateStats();
+        }
+
+        // Update statistics
+        function updateStats() {
+            const total = tasks.length;
+            const completed = tasks.filter(t => t.completed).length;
+            const inProgress = total - completed;
+
+            totalCount.textContent = total;
+            inProgressCount.textContent = inProgress;
+            completedCount.textContent = completed;
+        }
+
+        // Toggle task completion
+        function toggleTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                renderTasks();
+                saveTasks();
+            }
+        }
+
+        // Delete task
+        function deleteTask(id) {
+            if (confirm('确定要删除这个任务吗？')) {
+                tasks = tasks.filter(t => t.id !== id);
+                renderTasks();
+                saveTasks();
+            }
+        }
+
+        // Open edit modal
+        function openEditModal(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                editingTaskId = id;
+                editTaskInput.value = task.title;
+                editTagSelect.value = task.tag;
+                editPrioritySelect.value = task.priority;
+                editModal.classList.remove('hidden');
+                editTaskInput.focus();
+            }
+        }
+
+        // Close edit modal
+        function closeEditModal() {
+            editModal.classList.add('hidden');
+            editingTaskId = null;
+            editTaskInput.value = '';
+        }
+
+        // Save edited task
+        function saveEditedTask() {
+            const title = editTaskInput.value.trim();
+            if (!title) {
+                alert('请输入任务内容');
+                return;
+            }
+
+            const task = tasks.find(t => t.id === editingTaskId);
+            if (task) {
+                task.title = title;
+                task.tag = editTagSelect.value;
+                task.priority = editPrioritySelect.value;
+                renderTasks();
+                saveTasks();
+                closeEditModal();
+            }
+        }
+
+        // Add new task
+        function addTask() {
+            const title = taskInput.value.trim();
+            if (!title) return;
+
+            const now = new Date();
+            const time = `今天 · ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+            const newTask = {
+                id: nextId++,
+                title: title,
+                tag: tagSelect.value,
+                priority: prioritySelect.value,
+                time: time,
+                completed: false
+            };
+
+            tasks.unshift(newTask);
+            taskInput.value = '';
+            renderTasks();
+            saveTasks();
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Save tasks to localStorage
+        function saveTasks() {
+            localStorage.setItem('flowy-todo-tasks', JSON.stringify(tasks));
+            localStorage.setItem('flowy-todo-nextid', nextId);
+        }
+
+        // Load tasks from localStorage
+        function loadTasks() {
+            const savedTasks = localStorage.getItem('flowy-todo-tasks');
+            const savedNextId = localStorage.getItem('flowy-todo-nextid');
+            if (savedTasks) {
+                tasks = JSON.parse(savedTasks);
+                nextId = savedNextId ? parseInt(savedNextId) : tasks.length + 1;
+            }
+        }
+
+        // Event listeners
+        addBtn.addEventListener('click', addTask);
+
+        taskInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addTask();
+            }
+        });
+
+        filterTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                filterTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentFilter = tab.dataset.filter;
+                renderTasks();
+            });
+        });
+
+        cancelEditBtn.addEventListener('click', closeEditModal);
+        saveEditBtn.addEventListener('click', saveEditedTask);
+
+        editModal.addEventListener('click', (e) => {
+            if (e.target === editModal) {
+                closeEditModal();
+            }
+        });
+
+        editTaskInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                saveEditedTask();
+            }
+        });
+
+        // Initialize
+        loadTasks();
+        renderTasks();
+    </script>
+</body>
+</html>

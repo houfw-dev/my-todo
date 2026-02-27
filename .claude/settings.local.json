@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp -r /tmp/my-todo-vue/* /tmp/my-todo-vue/.* . 2>/dev/null; ls -la)",
+      "Bash(npm install)",
+      "Bash(npm run dev)",
+      "Bash(open http://localhost:5173)",
+      "Bash(which npm && npm --version)",
+      "Bash(npm create vite@latest . -- --template vue-ts --force 2>&1)"
+    ]
+  }
+}
