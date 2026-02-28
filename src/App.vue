@@ -189,7 +189,7 @@ function addTask() {
   if (!title) return;
 
   const now = new Date();
-  const time = `今天 · ${now.getHours()}:${String(now.getMinutes()).padStart(2, "0")}`;
+  const time = `今天 · ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
 
   const newTask: Task = {
     id: nextId.value++,

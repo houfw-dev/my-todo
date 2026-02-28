@@ -99,7 +99,11 @@ export function loadTasks(): Task[] {
 }
 
 export function saveTasks(tasks: Task[]): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  } catch (e) {
+    console.warn("Failed to save tasks to localStorage:", e);
+  }
 }
 
 export function loadNextId(): number {
@@ -112,5 +116,9 @@ export function loadNextId(): number {
 }
 
 export function saveNextId(nextId: number): void {
-  localStorage.setItem(NEXT_ID_KEY, nextId.toString());
+  try {
+    localStorage.setItem(NEXT_ID_KEY, nextId.toString());
+  } catch (e) {
+    console.warn("Failed to save nextId to localStorage:", e);
+  }
 }

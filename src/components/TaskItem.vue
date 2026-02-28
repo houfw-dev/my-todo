@@ -3,7 +3,12 @@
     <div
       class="task-checkbox"
       :class="{ checked: task.completed }"
+      role="checkbox"
+      :aria-checked="task.completed"
+      tabindex="0"
       @click="$emit('toggle', task.id)"
+      @keypress.enter="$emit('toggle', task.id)"
+      @keypress.space.prevent="$emit('toggle', task.id)"
     ></div>
     <div class="task-content">
       <div class="task-title">{{ task.title }}</div>
@@ -78,6 +83,11 @@ defineEmits<{
   justify-content: center;
   flex-shrink: 0;
   transition: all 0.2s;
+}
+
+.task-checkbox:focus {
+  outline: 2px solid #7c6aef;
+  outline-offset: 2px;
 }
 
 .task-checkbox.checked {

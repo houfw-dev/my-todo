@@ -7,9 +7,12 @@
         v-model="form.title"
         type="text"
         class="modal-input"
+        :class="{ error: showError }"
         placeholder="任务内容..."
         @keypress.enter="save"
+        @input="showError = false"
       />
+      <div v-if="showError" class="error-message">请输入任务内容</div>
       <div class="modal-select-group">
         <label>分类</label>
         <select v-model="form.tag">
@@ -53,6 +56,7 @@ const emit = defineEmits<{
 }>();
 
 const inputRef = ref<HTMLInputElement | null>(null);
+const showError = ref(false);
 
 const form = reactive({
   title: props.task.title,
@@ -68,12 +72,12 @@ watch(
     form.priority = newTask.priority;
     inputRef.value?.focus();
   },
-  { immediate: true },
 );
 
 function save() {
   if (!form.title.trim()) {
-    alert("请输入任务内容");
+    showError.value = true;
+    inputRef.value?.focus();
     return;
   }
   emit("save", {
@@ -125,7 +129,19 @@ function save() {
   color: #333;
   background: #f8f7ff;
   border-radius: 12px;
+  margin-bottom: 8px;
+  transition: box-shadow 0.2s;
+}
+
+.modal-input.error {
+  box-shadow: 0 0 0 2px #ff5252;
+}
+
+.error-message {
+  color: #ff5252;
+  font-size: 13px;
   margin-bottom: 16px;
+  padding-left: 4px;
 }
 
 .modal-select-group {
