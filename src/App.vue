@@ -114,7 +114,7 @@ import {
 
 const tasks = ref<Task[]>([]);
 const nextId = ref(DEFAULT_NEXT_ID);
-const currentFilter = ref<FilterType>("all");
+const currentFilter = ref<FilterType>("inProgress");
 const newTaskTitle = ref("");
 const newTaskTag = ref<TaskTag>("personal");
 const newTaskPriority = ref<TaskPriority>("low");
